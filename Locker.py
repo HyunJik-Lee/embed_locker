@@ -24,6 +24,15 @@ class Locker():
         GPIO.setup(5, GPIO.IN, GPIO.PUD_UP)
         GPIO.add_event_detect(19, GPIO.RISING, callback = self.door_op, bouncetime=2000)
         GPIO.add_event_detect(13, GPIO.RISING, callback = self.change_passwd_op, bouncetime = 10000)
+        GPIO.add_event_detect(5, GPIO.RISING, callback = self.close_after_3s, bouncetime = 5000)
+
+    def close_after_3s(self, channel):
+        print('문이 닫혔습니다.')
+        time.sleep(3)
+        if GPIO.input(5) is 1 and self.Locked is False :
+            print('문을 잠급니다.')
+            self.door_op(None)
+
 
     def door_op(self, channel):
         if self.Locked is True:
@@ -71,7 +80,7 @@ class Locker():
             print('비밀번호가 틀렸습니다.')
             return
 
-    def change_passwd_op(self, channel):
+    def change_passwd_op(self, channel): 
         seq = []
         print('변경할 비밀번호 입력후 \'#\' 입력, 초기화는 \'D\', 취소는 \'C\'')
         digit = None
@@ -110,7 +119,7 @@ if __name__ == '__main__':
                 a.pw_door_open()
                 digit = None
 
-
+        
         if GPIO.event_detected(19):
             print('Tact 19 Pressed')
         if GPIO.event_detected(13):
