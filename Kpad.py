@@ -15,6 +15,7 @@ class Keypad:
                 ]
         self.ROW = row_pin
         self.COLUMN = col_pin
+        self.use = "main"
         
     def getKey(self):
         #모든 열을 output으로 설정
