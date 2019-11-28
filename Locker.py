@@ -76,7 +76,7 @@ class Locker():
 						print(digit)
 						i = i + 1
 						seq.append(digit)
-			time.sleep(0.4)
+			time.sleep(0.3)
 
 		print(seq)
 
@@ -113,7 +113,7 @@ class Locker():
 					self.passwd = seq
 					print('변경완료')
 					return
-			time.sleep(0.4)
+			time.sleep(0.3)
 	
 	def face_door_open(self):
 		print("얼굴 인식 중입니다. 카메라를 응시해 주세요.")
