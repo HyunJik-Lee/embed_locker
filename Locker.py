@@ -6,6 +6,7 @@ from LimitSwitch import LimitSwitch
 from FaceRecognition import Face_Recog_Op
 import time
 import RPi.GPIO as GPIO
+from pad4pi import rpi_gpio
 
 GPIO.setmode(GPIO.BCM)
 
@@ -14,14 +15,16 @@ class Locker():
 		self.dot = Dot()
 		self.keypad = Keypad()
 		self.motor = Motor()
-		self.face_recog_op = Face_Recog_Op()
+		self.face_recog_op = Face_Recog_Op(self.keypad)
 		self.lock_switch = 19
 		self.change_pass_switch = 13
 		self.close_switch = 5
 		self.add_face_switch = 6
 		self.Locked = True
 		self.Door_closed = True
-		self.passwd = [1,2,3,4,'#']
+		self.passwd = [1,2,3,4,5]
+		self.kp = rpi_gpio.KeypadFactory().create_keypad(keypad=self.keypad.KEYPAD, row_pins=self.keypad.ROW, col_pins=self.keypad.COLUMN)
+
 		GPIO.setup(self.lock_switch, GPIO.IN, GPIO.PUD_UP)
 		GPIO.setup(self.change_pass_switch, GPIO.IN, GPIO.PUD_UP)
 		GPIO.setup(self.close_switch, GPIO.IN, GPIO.PUD_UP)
@@ -30,6 +33,7 @@ class Locker():
 		GPIO.add_event_detect(self.change_pass_switch, GPIO.RISING, callback = self.change_passwd_op, bouncetime = 10000)
 		GPIO.add_event_detect(self.close_switch, GPIO.RISING, callback = self.close_after_3s, bouncetime = 5000)
 		GPIO.add_event_detect(self.add_face_switch, GPIO.RISING, callback = self.face_add_and_train, bouncetime = 100000)
+		self.kp.registerKeyPressHandler(self.key_pressed)
 
 	def close_after_3s(self, channel):
 		print('문이 닫혔습니다.')
@@ -37,7 +41,6 @@ class Locker():
 		if GPIO.input(self.close_switch) is 1 and self.Locked is False :
 			print('문을 잠급니다.')
 			self.door_op(True)
-
 
 	def door_op(self, channel):
 		if self.Locked is True:
@@ -53,6 +56,7 @@ class Locker():
 			return
 
 	def pw_door_open(self):
+		self.dot.password()
 		seq = []
 		i = 0
 		print('비밀번호 입력, 초기화는 \'D\', 취소는 \'C\'')
@@ -88,7 +92,8 @@ class Locker():
 
 	def change_passwd_op(self, channel): 
 		seq = []
-		print('변경할 비밀번호 입력후 \'#\' 입력, 초기화는 \'D\', 취소는 \'C\'')
+		self.dot.password()
+		print('변경할 비밀번호 입력후 \'A\' 입력, 초기화는 \'D\', 취소는 \'C\'')
 		digit = None
 		while digit == None:
 			digit = self.keypad.getKey()
@@ -100,11 +105,11 @@ class Locker():
 				elif digit == 'C':
 					print('취소')
 					return
-				elif digit != '#':
+				elif digit != 'A':
 					seq.append(digit)
 					print(digit)
 					digit = None
-				elif digit == '#':
+				elif digit == 'A':
 					self.passwd = seq
 					print('변경완료')
 					return
@@ -128,31 +133,23 @@ class Locker():
 		self.dot.question()
 		self.face_recog_op.add_face()
 		self.dot.question()
-		self.face_recog_op.train_face()
+		self.face_recog_op.train_faces()
 		self.dot.success()
 		print("추가 완료")
 		return
 
+	def key_pressed(self, key):
+		val = str(key)
+		if val == '*':
+			self.pw_door_open()
+		if val == '#':
+			self.face_door_open()
+
 if __name__ == '__main__':
 	a = Locker()
-	while True:
-		digit = None
-		while digit == None:
-			digit = a.keypad.getKey()
-			if digit == '*':
-				time.sleep(0.4)
-				a.pw_door_open()
-				digit = None
-			if digit == '#':
-				time.sleep(0.4)
-				a.face_door_open()
-				digit = None
-		
-		if GPIO.event_detected(a.lock_switch):
-			print('Tact 19(lock_switch) Pressed')
-		if GPIO.event_detected(a.change_pass_switch):
-			print('Tact 13(change_pass_switch) Pressed')
-		if GPIO.event_detected(a.add_face_switch):
-			print('Tact 6(add_face_switch) Pressed')
-	
+	try:
+		while True:
+			time.sleep(1)
 
+	except KeyboardInterrupt:
+		GPIO.cleanup()

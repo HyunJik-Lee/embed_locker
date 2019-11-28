@@ -10,9 +10,11 @@ from PIL import Image
 import time
 
 class Face_Recog_Op():
-	def __init__(self):
+	keypad = 0
+	def __init__(self, Skeypad):
 		self.camera  = PiCamera()
-		self.keypad = Keypad()
+		# self.keypad = Keypad()
+		self.keypad = Skeypad
 		self.camera.resolution = (640, 480)
 		self.camera.framerate = 30
 		self.rawCapture = PiRGBArray(self.camera, size=(640,480))
@@ -130,6 +132,7 @@ class Face_Recog_Op():
 				for name, value in self.dict.items():
 					if value == id_:
 						print(name)
+						self.rawCapture.truncate(0)
 						cv2.destroyAllWindows()
 						return name     
 				if conf <= 70:
@@ -138,6 +141,8 @@ class Face_Recog_Op():
 			
 			#시간 초과
 			if (time.time() - start) >= 10:
+				self.rawCapture.truncate(0)
+				cv2.destroyAllWindows()
 				return -1
 
 			cv2.imshow('frame', frame)

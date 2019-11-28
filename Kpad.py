@@ -5,7 +5,7 @@ GPIO.setwarnings(False)
 
 class Keypad:
     #키패드의 행과 열의 핀번호를 리스트로 전달하여 초기화 할 수 있다.
-    def __init__(self, row_pin=[18,23,24,25], col_pin=[4,17,22,21]):
+    def __init__(self, row_pin=None, col_pin=None):
         GPIO.setmode(GPIO.BCM)
         self.KEYPAD = [
                 [1,2,3,"A"],
@@ -13,9 +13,12 @@ class Keypad:
                 [7,8,9,"C"],
                 ["*",0,"#","D"]
                 ]
-        self.ROW = row_pin
-        self.COLUMN = col_pin
-        self.use = "main"
+
+        if row_pin is None:
+            self.ROW = [18,23,24,25]
+
+        if col_pin is None:
+            self.COLUMN = [4,17,22,21]
         
     def getKey(self):
         #모든 열을 output으로 설정

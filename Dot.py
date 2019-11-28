@@ -41,6 +41,12 @@ class Dot:
         self.sshape2 = [0x3C, 0x42, 0x85, 0x81, 0x81, 0x85, 0x42, 0x3C]
         self.sshape3 = [0x3C, 0x42, 0x85, 0xA1, 0xA1, 0x85, 0x42, 0x3C]
         self.sshape4 = [0x3C, 0x52, 0xA5, 0xA1, 0xA1, 0xA5, 0x52, 0x3C]
+        self.pshape1 = [0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+        self.pshape2 = [0x1B, 0x0B, 0x00, 0x03, 0x01, 0x00, 0x00, 0x00]
+        self.pshape3 = [0xDB, 0x5B, 0x00, 0x1B, 0x0B, 0x00, 0x03, 0x01]
+        self.pshape4 = [0xDB, 0xDB, 0x00, 0xDB, 0x5B, 0x00, 0x1B, 0x0B]
+        self.pshape5 = [0xDB, 0xDB, 0x00, 0xDB, 0xDB, 0x00, 0xDB, 0xDB]
+        
         
         #SPI통신을 위해서 초기화
         self.spi = spidev.SpiDev()
@@ -142,7 +148,7 @@ class Dot:
     
     #얼굴 인식 물음표 표시 메소드
     def question(self):
-        delay = self.delay * 2
+        delay = self.delay * 1.5
         for idx in range(8):
             data = [idx+1, self.qshape1[idx]]
             self.spi.xfer2(data)
@@ -164,7 +170,7 @@ class Dot:
 
     #얼굴 인식 스마일 표시 메소드
     def smile(self):
-        delay = self.delay * 1.5
+        delay = self.delay * 1.2
         for idx in range(8):
             data = [idx+1, self.sshape1[idx]]
             self.spi.xfer2(data)
@@ -183,6 +189,32 @@ class Dot:
         time.sleep(delay)
         self.clear()
         return None
+
+    #비밀번호 모드 표시 메소드
+    def password(self):
+        delay = self.delay
+        for idx in range(8):
+            data = [idx+1, self.pshape1[idx]]
+            self.spi.xfer2(data)
+        time.sleep(self.delay)
+        for idx in range(8):
+            data = [idx+1, self.pshape2[idx]]
+            self.spi.xfer2(data)
+        time.sleep(self.delay)
+        for idx in range(8):
+            data = [idx+1, self.pshape3[idx]]
+            self.spi.xfer2(data)
+        time.sleep(self.delay)
+        for idx in range(8):
+            data = [idx+1, self.pshape4[idx]]
+            self.spi.xfer2(data)
+        time.sleep(self.delay)
+        for idx in range(8):
+            data = [idx+1, self.pshape5[idx]]
+            self.spi.xfer2(data)
+        time.sleep(self.delay)
+        self.clear()
+
     #출력 후 Dotmatrix를 초기화 하는 메소
     def clear(self):
         for register in range(8):
@@ -199,5 +231,6 @@ if __name__ == '__main__':
     dot.unlock()
     dot.question()
     dot.smile()
+    dot.password()
     dot.spi.close()
     

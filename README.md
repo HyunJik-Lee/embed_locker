@@ -36,6 +36,7 @@
 - picamera.PiCamera
 - PIL.Image
 - spidev
+- pad4pi
 
 ## 설치한 라이브러리
 - libhdf5-dev
