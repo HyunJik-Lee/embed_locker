@@ -82,8 +82,11 @@ class Face_Recog_Op():
 
 			if key == 27:
 				break
-
+                
+                
+		self.rawCapture.truncate(0)
 		cv2.destroyAllWindows()
+
 	
 	def train_faces(self):
 		for root, dirs, files in os.walk(self.imageDir):
