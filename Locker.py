@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 from ServoMotor import Motor
 from Dot import Dot
 from Kpad import Keypad
@@ -32,7 +34,7 @@ class Locker():
 		GPIO.add_event_detect(self.lock_switch, GPIO.RISING, callback = self.door_op, bouncetime=2000)
 		GPIO.add_event_detect(self.change_pass_switch, GPIO.RISING, callback = self.change_passwd_op, bouncetime = 10000)
 		GPIO.add_event_detect(self.close_switch, GPIO.RISING, callback = self.close_after_3s, bouncetime = 5000)
-		GPIO.add_event_detect(self.add_face_switch, GPIO.RISING, callback = self.face_add_and_train, bouncetime = 100000)
+		GPIO.add_event_detect(self.add_face_switch, GPIO.RISING, callback = self.face_add_and_train, bouncetime = 50000)
 		self.kp.registerKeyPressHandler(self.key_pressed)
 
 	def close_after_3s(self, channel):
@@ -118,6 +120,10 @@ class Locker():
 	def face_door_open(self):
 		print("얼굴 인식 중입니다. 카메라를 응시해 주세요.")
 		self.dot.smile()
+		if self.face_recog_op.havedata is False:
+			self.dot.fail()
+			print('인식에 실패했거나 등록되지 않은 얼굴입니다.')
+			return
 		name = self.face_recog_op.detect_face()
 		if name in self.face_recog_op.dict:
 			self.dot.success()
